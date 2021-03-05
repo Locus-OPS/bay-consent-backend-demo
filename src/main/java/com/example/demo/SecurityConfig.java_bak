@@ -1,0 +1,67 @@
+package com.example.demo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+	@Order(1)
+	@Configuration
+	public static class BasicAuthenSecurityConfiguration extends WebSecurityConfigurerAdapter {
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			  http
+		         //.csrf().disable()
+		         .antMatcher("/customers/**")
+		         .authorizeRequests()
+		         .anyRequest()
+		         //.authenticated()
+		         .hasRole("CUSTOMER")
+		         .and()
+		         .httpBasic();
+	    }
+		
+		@Autowired
+	    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	        auth
+	        	.inMemoryAuthentication()
+	            .withUser("customer")
+	            .password("{noop}password")
+	            .roles("CUSTOMER");
+	    }
+	}
+	
+	@Order(2)
+	@Configuration
+	public class SecurityConfig2 extends WebSecurityConfigurerAdapter {
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			  http
+		         //.csrf().disable()
+		         .antMatcher("/employees/**")
+		         .authorizeRequests()
+		         .anyRequest()
+		         //.authenticated()
+		         .hasRole("EMPLOYEE")
+		         .and()
+		         .httpBasic();
+	    }
+	  
+	    @Autowired
+	    public void configureGlobal(AuthenticationManagerBuilder auth) 
+	            throws Exception 
+	    {
+	        auth
+	        	.inMemoryAuthentication()
+	            .withUser("admin")
+	            .password("{noop}password")
+	            .roles("EMPLOYEE");
+	    }
+	}
+}
